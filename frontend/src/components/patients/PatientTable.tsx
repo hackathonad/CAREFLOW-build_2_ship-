@@ -24,7 +24,8 @@ export const PatientTable: React.FC<PatientTableProps> = ({
       key: 'patient_code',
       header: 'Patient ID',
       render: (p) => (
-        <span className="font-mono text-xs font-semibold text-brand-400 bg-brand-950/80 px-2 py-0.5 rounded border border-brand-900/60">
+        <span className="font-mono text-[11px] font-bold text-blue-300 px-2 py-0.5 rounded"
+          style={{ background: 'rgba(0,112,243,0.12)', border: '1px solid rgba(0,112,243,0.25)' }}>
           {p.patient_code}
         </span>
       ),

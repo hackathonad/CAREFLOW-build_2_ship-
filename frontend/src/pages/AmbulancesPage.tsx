@@ -6,7 +6,8 @@ import { DispatchModal } from '../components/ambulances/DispatchModal';
 import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
-import { Truck, RefreshCw } from 'lucide-react';
+import { PageHeader } from '../components/shared/PageHeader';
+import { Truck } from 'lucide-react';
 
 export const AmbulancesPage: React.FC = () => {
   const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
@@ -68,29 +69,15 @@ export const AmbulancesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <div className="flex items-center space-x-2">
-            <Truck className="w-5 h-5 text-brand-400" />
-            <h1 className="text-xl font-bold tracking-tight text-slate-100">
-              Ambulance Fleet & Emergency Dispatch
-            </h1>
-          </div>
-          <p className="mt-1 text-xs text-slate-400">
-            Real-time emergency telemetry, active transit routes, and trauma triage coordination.
-          </p>
-        </div>
-
-        <button
-          onClick={fetchAmbulances}
-          disabled={isLoading}
-          className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors self-start sm:self-auto"
-          title="Refresh Fleet"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-brand-400' : ''}`} />
-        </button>
-      </div>
+      <PageHeader
+        icon={Truck}
+        title="Ambulance Fleet & Emergency Dispatch"
+        subtitle="Emergency telemetry, active transit routes, and trauma triage coordination."
+        iconColor="text-amber-400"
+        iconBg="bg-amber-500/10 border-amber-500/20"
+        onRefresh={fetchAmbulances}
+        isRefreshing={isLoading}
+      />
 
       {/* Filter and Search Bar */}
       <FilterBar

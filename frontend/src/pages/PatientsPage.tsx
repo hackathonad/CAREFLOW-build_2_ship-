@@ -7,7 +7,8 @@ import { AdmitPatientModal } from '../components/patients/AdmitPatientModal';
 import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
-import { Users, UserPlus, RefreshCw } from 'lucide-react';
+import { PageHeader } from '../components/shared/PageHeader';
+import { Users, UserPlus } from 'lucide-react';
 
 export const PatientsPage: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -83,38 +84,25 @@ export const PatientsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <div className="flex items-center space-x-2">
-            <Users className="w-5 h-5 text-brand-400" />
-            <h1 className="text-xl font-bold tracking-tight text-slate-100">
-              Patient Operations Registry
-            </h1>
-          </div>
-          <p className="mt-1 text-xs text-slate-400">
-            Admitted patient status tracking, stay duration metrics, and ward bed allocations.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2.5">
+      <PageHeader
+        icon={Users}
+        title="Patient Operations Registry"
+        subtitle="Admitted patient status tracking, stay duration metrics, and ward bed allocations."
+        iconColor="text-blue-400"
+        iconBg="bg-blue-500/10 border-blue-500/20"
+        onRefresh={fetchPatients}
+        isRefreshing={isLoading}
+        actions={
           <button
             onClick={() => setIsAdmitModalOpen(true)}
-            className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/20 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-xs font-semibold transition-all hover:-translate-y-px"
+            style={{ background: 'linear-gradient(135deg, #0059c2, #0070f3)', boxShadow: '0 4px 12px rgba(0,112,243,0.30)' }}
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>Admit Patient</span>
           </button>
-          <button
-            onClick={fetchPatients}
-            disabled={isLoading}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-brand-400' : ''}`} />
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter and Search Bar */}
       <FilterBar

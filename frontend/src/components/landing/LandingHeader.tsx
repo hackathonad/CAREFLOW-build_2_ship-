@@ -4,45 +4,68 @@ import { Activity, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export const LandingHeader: React.FC = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+    <header
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{
+        background: 'rgba(6,11,23,0.90)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
-            <Activity className="w-5 h-5" />
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #0059c2 0%, #0070f3 100%)',
+              boxShadow: '0 4px 12px rgba(0,112,243,0.40)',
+            }}
+          >
+            <Activity className="w-4.5 h-4.5 text-white" />
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight text-white">CareFlow</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-brand-400 ml-1.5 px-1.5 py-0.5 rounded bg-brand-950/80 border border-brand-800/60">
+            <span
+              className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
+              style={{
+                background: 'rgba(0,112,243,0.15)',
+                border: '1px solid rgba(0,112,243,0.30)',
+                color: '#93c5fd',
+              }}
+            >
               AI
             </span>
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-          <a href="#workflow" className="hover:text-white transition-colors">
-            Architecture
-          </a>
-          <a href="#capabilities" className="hover:text-white transition-colors">
-            Capabilities
-          </a>
-          <a href="#command-center" className="hover:text-white transition-colors">
-            AI Command Center
-          </a>
-          <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-2.5 py-1 rounded-full">
+        {/* Nav */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+          <a href="#workflow" className="hover:text-slate-200 transition-colors">Architecture</a>
+          <a href="#capabilities" className="hover:text-slate-200 transition-colors">Capabilities</a>
+          <a href="#command-center" className="hover:text-slate-200 transition-colors">AI Command</a>
+          <div
+            className="flex items-center gap-1.5 text-xs text-emerald-400 px-2.5 py-1 rounded-full"
+            style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.18)' }}
+          >
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Operations Automation Only</span>
           </div>
         </nav>
 
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center space-x-2 px-4 py-2 text-xs sm:text-sm font-medium rounded-lg bg-brand-600 hover:bg-brand-500 text-white shadow-md shadow-brand-600/20 transition-all hover:translate-x-0.5"
-          >
-            <span>Launch Operations</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        {/* CTA */}
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:-translate-y-px"
+          style={{
+            background: 'linear-gradient(135deg, #0059c2 0%, #0070f3 100%)',
+            boxShadow: '0 4px 12px rgba(0,112,243,0.30)',
+          }}
+        >
+          <span>Launch Operations</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
     </header>
   );

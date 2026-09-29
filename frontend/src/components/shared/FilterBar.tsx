@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -21,40 +21,70 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   children,
 }) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
-      {/* Search Input */}
-      <div className="relative flex-1 max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      {/* Search */}
+      <div className="relative flex-1 max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
+          className="w-full pl-9 pr-8 py-2 text-sm text-slate-200 placeholder-slate-600 rounded-lg transition-colors focus:outline-none"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.09)',
+          }}
+          onFocus={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = 'rgba(0,112,243,0.50)';
+            (e.target as HTMLInputElement).style.boxShadow = '0 0 0 3px rgba(0,112,243,0.08)';
+          }}
+          onBlur={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = 'rgba(255,255,255,0.09)';
+            (e.target as HTMLInputElement).style.boxShadow = 'none';
+          }}
         />
+        {searchQuery && (
+          <button
+            onClick={() => onSearchChange('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
-      {/* Filter Tabs / Pills */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0">
+      {/* Filter pills */}
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin pb-0.5">
         {filterOptions && onFilterChange && (
-          <div className="flex items-center space-x-1 bg-slate-900/80 p-1 rounded-lg border border-slate-800">
+          <div
+            className="flex items-center gap-1 p-1 rounded-lg"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+          >
             {filterOptions.map((opt) => {
               const isActive = activeFilter === opt.value;
               return (
                 <button
                   key={opt.value}
                   onClick={() => onFilterChange(opt.value)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1 text-xs font-medium rounded-md whitespace-nowrap transition-all duration-150 ${
                     isActive
-                      ? 'bg-brand-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                      ? 'text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]'
                   }`}
+                  style={
+                    isActive
+                      ? { background: 'linear-gradient(135deg, #0059c2, #0070f3)', boxShadow: '0 2px 8px rgba(0,112,243,0.25)' }
+                      : {}
+                  }
                 >
                   {opt.label}
                   {opt.count !== undefined && (
                     <span
-                      className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] ${
-                        isActive ? 'bg-brand-700 text-brand-100' : 'bg-slate-800 text-slate-400'
+                      className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] tabular-nums ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-white/[0.06] text-slate-500'
                       }`}
                     >
                       {opt.count}

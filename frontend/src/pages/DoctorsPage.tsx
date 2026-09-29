@@ -5,7 +5,8 @@ import { DoctorCard } from '../components/doctors/DoctorCard';
 import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
-import { Stethoscope, RefreshCw } from 'lucide-react';
+import { PageHeader } from '../components/shared/PageHeader';
+import { Stethoscope } from 'lucide-react';
 
 export const DoctorsPage: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -57,25 +58,23 @@ export const DoctorsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <div className="flex items-center space-x-2">
-            <Stethoscope className="w-5 h-5 text-sky-400" />
-            <h1 className="text-xl font-bold tracking-tight text-slate-100">
-              Doctors & Clinical Duty Roster
-            </h1>
-          </div>
-          <p className="mt-1 text-xs text-slate-400">
-            Real-time physician workload balancing, shift schedules, and departmental availability.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2">
+      <PageHeader
+        icon={Stethoscope}
+        title="Doctors & Clinical Duty Roster"
+        subtitle="Real-time physician workload balancing, shift schedules, and departmental availability."
+        iconColor="text-cyan-400"
+        iconBg="bg-cyan-500/10 border-cyan-500/20"
+        onRefresh={fetchDoctors}
+        isRefreshing={isLoading}
+        actions={
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-brand-500"
+            className="px-3 py-2 text-xs text-slate-300 rounded-lg focus:outline-none"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
+            }}
           >
             <option value="all">All Departments</option>
             <option value="Cardiology">Cardiology</option>
@@ -84,20 +83,11 @@ export const DoctorsPage: React.FC = () => {
             <option value="Orthopedics">Orthopedics</option>
             <option value="Pediatrics">Pediatrics</option>
             <option value="General Surgery">General Surgery</option>
-            <option value="Intensive Care Unit">Intensive Care Unit</option>
+            <option value="Intensive Care Unit">ICU</option>
             <option value="Nephrology">Nephrology</option>
           </select>
-
-          <button
-            onClick={fetchDoctors}
-            disabled={isLoading}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
-            title="Refresh Roster"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-brand-400' : ''}`} />
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter and Search Bar */}
       <FilterBar

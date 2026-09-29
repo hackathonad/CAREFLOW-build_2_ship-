@@ -8,7 +8,8 @@ import { DashboardResourceOverview } from '../components/dashboard/DashboardReso
 import { DashboardRecentActivity } from '../components/dashboard/DashboardRecentActivity';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
-import { RefreshCw, LayoutDashboard, Sparkles } from 'lucide-react';
+import { PageHeader } from '../components/shared/PageHeader';
+import { LayoutDashboard, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const DashboardPage: React.FC = () => {
@@ -52,39 +53,25 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <div className="flex items-center space-x-2">
-            <LayoutDashboard className="w-5 h-5 text-brand-400" />
-            <h1 className="text-xl font-bold tracking-tight text-slate-100">
-              Hospital Operations Control Center
-            </h1>
-          </div>
-          <p className="mt-1 text-xs text-slate-400">
-            Real-time operational overview, ward triage telemetry, and autonomous workflow monitoring.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2.5">
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Hospital Operations Control Center"
+        subtitle="Real-time operational overview, ward occupancy, and autonomous workflow monitoring."
+        iconColor="text-blue-400"
+        iconBg="bg-blue-500/10 border-blue-500/20"
+        onRefresh={fetchDashboardData}
+        isRefreshing={isLoading}
+        actions={
           <Link
             to="/ai-command-center"
-            className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/20 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-xs font-semibold transition-all hover:-translate-y-px"
+            style={{ background: 'linear-gradient(135deg, #0059c2, #0070f3)', boxShadow: '0 4px 12px rgba(0,112,243,0.30)' }}
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>AI Command Center</span>
           </Link>
-
-          <button
-            onClick={fetchDashboardData}
-            disabled={isLoading}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
-            title="Refresh Telemetry"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-brand-400' : ''}`} />
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Priority Alerts Banner */}
       {data?.alerts && <DashboardAlerts alerts={data.alerts} />}

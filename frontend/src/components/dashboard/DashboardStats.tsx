@@ -18,7 +18,7 @@ interface DashboardStatsProps {
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <StatCard
         title="Total Patients"
         value={stats.totalPatients}
@@ -36,7 +36,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
       <StatCard
         title="Available Beds"
         value={stats.availableBeds}
-        subtitle="Intake ready"
+        subtitle="Ready for intake"
         icon={CheckCircle2}
         variant="success"
       />
@@ -59,7 +59,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
         value={stats.activeAmbulances}
         subtitle="Dispatched or en route"
         icon={Truck}
-        variant="brand"
+        variant="cyan"
       />
       <StatCard
         title="Low Stock Items"

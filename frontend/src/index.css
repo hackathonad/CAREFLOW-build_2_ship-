@@ -1,27 +1,264 @@
+/* Google Fonts must be first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CAREFLOW AI — PREMIUM GOVERNMENT-GRADE UI
+   Global Design System
+   ============================================ */
+:root {
+  --sidebar-width: 256px;
+  --topbar-height: 60px;
+  --brand-primary: #0070f3;
+  --brand-glow: rgba(0, 112, 243, 0.25);
+  --cyan-primary: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.20);
+  --bg-base: #060b17;
+  --bg-surface: #0a0f1e;
+  --bg-elevated: #0f172a;
+  --bg-card: #111827;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+}
+
+/* ============ BASE STYLES ============ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0b0f19;
-  color: #f8fafc;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Clean Custom Scrollbar */
+/* ============ CUSTOM SCROLLBAR ============ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: var(--bg-base);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ============ GRID TEXTURE UTILITY ============ */
+.bg-grid-texture {
+  background-image: var(--tw-gradient-stops, linear-gradient(rgba(0,112,243,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,112,243,0.04) 1px, transparent 1px));
+  background-size: 40px 40px;
+}
+
+/* ============ GLASS CARD ============ */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ============ PREMIUM CARD ============ */
+.premium-card {
+  background: linear-gradient(135deg, #111827 0%, #0f172a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.premium-card:hover {
+  border-color: rgba(0, 112, 243, 0.25);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(0, 112, 243, 0.08);
+}
+
+/* ============ STAT CARD ============ */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,112,243,0.6), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+/* ============ STATUS INDICATORS ============ */
+.status-pulse-green {
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  animation: pulseGreen 2s infinite;
+}
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.status-pulse-red {
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  animation: pulseRed 1.5s infinite;
+}
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.status-pulse-amber {
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  animation: pulseAmber 2s infinite;
+}
+@keyframes pulseAmber {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* ============ PROGRESS BARS ============ */
+.progress-bar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============ SIDEBAR ACTIVE GLOW ============ */
+.nav-active-glow {
+  box-shadow: inset 3px 0 0 var(--brand-primary), inset 0 0 20px rgba(0,112,243,0.06);
+}
+
+/* ============ TOPBAR GRADIENT SEPARATOR ============ */
+.topbar-gradient {
+  background: linear-gradient(180deg, rgba(6,11,23,0.95) 0%, rgba(6,11,23,0.85) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ============ COMMAND INPUT GLOW ============ */
+.command-input-focus:focus-within {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08), 0 0 20px rgba(6, 182, 212, 0.10);
+}
+
+/* ============ TABLE STYLES ============ */
+.data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+.data-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+/* ============ BADGE VARIANTS ============ */
+.badge-critical {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+.badge-warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.badge-success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+.badge-info {
+  background: rgba(0, 112, 243, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(0, 112, 243, 0.25);
+}
+.badge-neutral {
+  background: rgba(148, 163, 184, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+.badge-cyan {
+  background: rgba(6, 182, 212, 0.12);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+/* ============ SHIMMER LOADING ============ */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.07) 50%,
+    rgba(255,255,255,0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============ LANDING PAGE ============ */
+.hero-glow {
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,112,243,0.15) 0%, transparent 70%);
+}
+.hero-grid {
+  background-image: linear-gradient(rgba(0,112,243,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,112,243,0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ============ PAGE TRANSITIONS ============ */
+.page-enter {
+  animation: fadeIn 0.25s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ SELECTION ============ */
+::selection {
+  background: rgba(0, 112, 243, 0.35);
+  color: #f1f5f9;
+}
+
+/* ============ FOCUS RING ============ */
+:focus-visible {
+  outline: 2px solid rgba(0, 112, 243, 0.6);
+  outline-offset: 2px;
+}
+
+/* ============ RESPONSIVE OVERFLOW FIX ============ */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }

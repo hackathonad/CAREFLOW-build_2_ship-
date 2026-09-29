@@ -2,90 +2,123 @@ import React from 'react';
 
 interface StatusBadgeProps {
   status: string;
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
+  pulse?: boolean;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md', pulse }) => {
   const normalized = status.toLowerCase().replace(/[\s-]/g, '_');
 
-  const getColorClasses = (st: string) => {
+  const getStyles = (st: string): { bg: string; text: string; border: string; dot: string } => {
     switch (st) {
-      // Patients
+      // ── Patients ──
       case 'admitted':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return { bg: 'bg-blue-500/10', text: 'text-blue-300', border: 'border-blue-500/25', dot: 'bg-blue-400' };
       case 'resting':
-        return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+        return { bg: 'bg-indigo-500/10', text: 'text-indigo-300', border: 'border-indigo-500/25', dot: 'bg-indigo-400' };
       case 'under_observation':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
       case 'needs_attention':
-        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+        return { bg: 'bg-orange-500/10', text: 'text-orange-300', border: 'border-orange-500/25', dot: 'bg-orange-400' };
       case 'critical':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20 animate-pulse';
+        return { bg: 'bg-rose-500/12', text: 'text-rose-300', border: 'border-rose-500/30', dot: 'bg-rose-400' };
       case 'discharge_ready':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', border: 'border-emerald-500/25', dot: 'bg-emerald-400' };
       case 'discharged':
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+        return { bg: 'bg-slate-700/40', text: 'text-slate-400', border: 'border-slate-600/30', dot: 'bg-slate-500' };
 
-      // Beds
+      // ── Beds ──
       case 'available':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', border: 'border-emerald-500/25', dot: 'bg-emerald-400' };
       case 'occupied':
-        return 'bg-sky-500/10 text-sky-400 border-sky-500/20';
+        return { bg: 'bg-sky-500/10', text: 'text-sky-300', border: 'border-sky-500/25', dot: 'bg-sky-400' };
       case 'reserved':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
       case 'maintenance':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return { bg: 'bg-rose-500/10', text: 'text-rose-300', border: 'border-rose-500/25', dot: 'bg-rose-400' };
 
-      // Inventory
+      // ── Inventory ──
       case 'normal':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', border: 'border-emerald-500/25', dot: 'bg-emerald-400' };
       case 'low_stock':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
+      case 'critical_stock':
       case 'out_of_stock':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return { bg: 'bg-rose-500/10', text: 'text-rose-300', border: 'border-rose-500/25', dot: 'bg-rose-400' };
 
-      // Ambulances
+      // ── Ambulances ──
       case 'dispatched':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
       case 'en_route':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return { bg: 'bg-blue-500/10', text: 'text-blue-300', border: 'border-blue-500/25', dot: 'bg-blue-400' };
       case 'at_hospital':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+        return { bg: 'bg-purple-500/10', text: 'text-purple-300', border: 'border-purple-500/25', dot: 'bg-purple-400' };
 
-      // Tasks / Approvals
+      // ── Tasks / Approvals ──
       case 'pending':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
       case 'in_progress':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return { bg: 'bg-blue-500/10', text: 'text-blue-300', border: 'border-blue-500/25', dot: 'bg-blue-400' };
       case 'completed':
       case 'approved':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', border: 'border-emerald-500/25', dot: 'bg-emerald-400' };
       case 'escalated':
       case 'rejected':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return { bg: 'bg-rose-500/10', text: 'text-rose-300', border: 'border-rose-500/25', dot: 'bg-rose-400' };
 
-      // Priority
+      // ── Priority ──
+      case 'urgent':
       case 'high':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return { bg: 'bg-rose-500/10', text: 'text-rose-300', border: 'border-rose-500/25', dot: 'bg-rose-400' };
       case 'medium':
-        return 'bg-slate-500/10 text-slate-300 border-slate-500/20';
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
       case 'low':
-        return 'bg-slate-600/10 text-slate-400 border-slate-600/20';
+        return { bg: 'bg-slate-700/40', text: 'text-slate-400', border: 'border-slate-600/30', dot: 'bg-slate-500' };
+
+      // ── Doctor status ──
+      case 'on_duty':
+      case 'on duty':
+        return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', border: 'border-emerald-500/25', dot: 'bg-emerald-400' };
+      case 'off_duty':
+      case 'off duty':
+        return { bg: 'bg-slate-700/40', text: 'text-slate-400', border: 'border-slate-600/30', dot: 'bg-slate-500' };
+      case 'on_leave':
+      case 'on leave':
+        return { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/25', dot: 'bg-amber-400' };
 
       default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
+        return { bg: 'bg-slate-700/40', text: 'text-slate-300', border: 'border-slate-600/30', dot: 'bg-slate-400' };
     }
   };
 
-  const formattedText = status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const styles = getStyles(normalized);
+  const isCritical = normalized === 'critical' || normalized === 'critical_stock' || normalized === 'urgent';
+
+  const sizeClasses = {
+    xs: 'px-1.5 py-0.5 text-[10px] gap-1',
+    sm: 'px-2 py-0.5 text-[11px] gap-1',
+    md: 'px-2.5 py-1 text-xs gap-1.5',
+  };
+
+  const dotSizes = {
+    xs: 'w-1 h-1',
+    sm: 'w-1.5 h-1.5',
+    md: 'w-1.5 h-1.5',
+  };
+
+  const formattedText = status
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase());
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${getColorClasses(
-        normalized
-      )} ${size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs'}`}
+      className={`inline-flex items-center font-medium rounded-full border ${styles.bg} ${styles.text} ${styles.border} ${sizeClasses[size]}`}
     >
-      <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-current opacity-80" />
+      <span
+        className={`rounded-full flex-shrink-0 ${styles.dot} ${dotSizes[size]} ${
+          (isCritical || pulse) ? 'animate-pulse' : ''
+        }`}
+      />
       {formattedText}
     </span>
   );

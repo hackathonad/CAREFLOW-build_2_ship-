@@ -1,4 +1,5 @@
 import React from 'react';
+import { Database } from 'lucide-react';
 
 export interface Column<T> {
   key: string;
@@ -24,36 +25,56 @@ export function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl bg-slate-900/30 text-slate-400 text-sm">
-        {emptyMessage}
+      <div
+        className="flex flex-col items-center justify-center py-14 rounded-xl text-center"
+        style={{ border: '1px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.01)' }}
+      >
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Database className="w-5 h-5 text-slate-600" />
+        </div>
+        <p className="text-sm text-slate-500">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 shadow-sm">
-      <table className="w-full text-left text-sm text-slate-200">
-        <thead className="bg-slate-900/90 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
-          <tr>
+    <div
+      className="table-container rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+    >
+      <table className="w-full text-left text-sm text-slate-200 data-table">
+        <thead>
+          <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             {columns.map((col) => (
-              <th key={col.key} className={`px-4 py-3 font-semibold ${col.className || ''}`}>
+              <th
+                key={col.key}
+                className={`px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap ${col.className || ''}`}
+              >
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/80">
+        <tbody style={{ background: 'rgba(10,15,30,0.95)' }}>
           {data.map((item, idx) => {
             const key = keyExtractor ? keyExtractor(item) : item.id || idx;
             return (
               <tr
                 key={key}
                 onClick={() => onRowClick && onRowClick(item)}
-                className={`transition-colors ${
+                className={`border-b transition-colors duration-100 ${
                   onRowClick
-                    ? 'cursor-pointer hover:bg-slate-800/50 active:bg-slate-800'
-                    : 'hover:bg-slate-800/25'
+                    ? 'cursor-pointer'
+                    : ''
                 }`}
+                style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+                onMouseEnter={(e) => {
+                  if (onRowClick) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.025)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
                 {columns.map((col) => (
                   <td key={col.key} className={`px-4 py-3.5 whitespace-nowrap ${col.className || ''}`}>

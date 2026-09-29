@@ -15,7 +15,7 @@ import {
   BarChart3,
   History,
   Activity,
-  ChevronRight,
+  Zap,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -47,13 +47,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   ];
 
   const renderNavGroup = (items: typeof primaryNav, title?: string) => (
-    <div className="mb-6">
+    <div className="mb-5">
       {title && (
-        <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        <div className="px-3 mb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-600">
           {title}
         </div>
       )}
-      <ul className="space-y-1">
+      <ul className="space-y-0.5">
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -62,23 +62,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group ${
+                  `group flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 ${
                     isActive
                       ? item.highlight
-                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                        : 'bg-slate-800 text-brand-400 font-semibold border-l-2 border-brand-500'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                        ? 'bg-blue-600 text-white shadow-[0_4px_12px_rgba(0,112,243,0.35)]'
+                        : 'bg-white/[0.07] text-slate-100 nav-active-glow'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
                   }`
                 }
               >
-                <div className="flex items-center space-x-2.5">
-                  <Icon className="w-4 h-4" />
-                  <span>{item.name}</span>
-                </div>
-                {item.highlight && (
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-700/70 text-brand-100">
-                    Live
-                  </span>
+                {({ isActive }) => (
+                  <>
+                    <div className="flex items-center gap-2.5">
+                      <Icon
+                        className={`w-4 h-4 transition-colors ${
+                          isActive
+                            ? item.highlight
+                              ? 'text-white'
+                              : 'text-blue-400'
+                            : 'text-slate-600 group-hover:text-slate-400'
+                        }`}
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                    {item.highlight && (
+                      <span className={`text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-blue-500/15 text-blue-400 border border-blue-500/25'
+                      }`}>
+                        AI
+                      </span>
+                    )}
+                  </>
                 )}
               </NavLink>
             </li>
@@ -93,53 +109,82 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-800/90 flex flex-col justify-between transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 flex flex-col transition-transform duration-300 lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{
+          background: 'linear-gradient(180deg, #07091a 0%, #060b17 100%)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+        }}
       >
-        <div className="p-4 overflow-y-auto">
-          {/* Logo Header */}
-          <NavLink to="/" className="flex items-center space-x-3 px-2 py-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-600/30">
-              <Activity className="w-4 h-4" />
+        {/* Logo */}
+        <div className="px-4 pt-5 pb-4 border-b border-white/[0.05]">
+          <NavLink to="/" className="flex items-center gap-3 px-2 py-1" onClick={onClose}>
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, #0059c2 0%, #0070f3 100%)',
+                boxShadow: '0 4px 12px rgba(0, 112, 243, 0.4)',
+              }}
+            >
+              <Activity className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <div className="text-base font-bold tracking-tight text-white flex items-center">
+            <div className="min-w-0">
+              <div className="text-[15px] font-bold tracking-tight text-white flex items-center gap-1.5">
                 <span>CareFlow</span>
-                <span className="ml-1 text-xs text-brand-400 font-semibold px-1 py-0.2 rounded bg-brand-950 border border-brand-800">
+                <span className="text-[10px] font-bold text-blue-300 px-1.5 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/25 tracking-wider">
                   AI
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium">Smart Operations Hub</p>
+              <p className="text-[10px] text-slate-600 font-medium mt-0.5 truncate">
+                Hospital Operations Platform
+              </p>
             </div>
           </NavLink>
+        </div>
 
-          {/* Navigation Groups */}
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin">
           {renderNavGroup(primaryNav)}
+
+          {/* Divider */}
+          <div className="mx-2 mb-4 border-t border-white/[0.05]" />
+
           {renderNavGroup(operationsNav, 'Hospital Operations')}
+
+          {/* Divider */}
+          <div className="mx-2 mb-4 border-t border-white/[0.05]" />
+
           {renderNavGroup(insightsNav, 'Intelligence & Registry')}
         </div>
 
-        {/* Footer info box */}
-        <div className="p-4 border-t border-slate-900 bg-slate-950">
-          <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px]">
-            <div className="flex items-center justify-between text-slate-300 font-medium">
-              <span className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Smart Automation Engine</span>
-              </span>
-              <span className="text-[10px] text-slate-500">v1.0</span>
+        {/* Footer status box */}
+        <div className="px-3 pb-4 pt-2 border-t border-white/[0.05]">
+          <div
+            className="rounded-lg p-3"
+            style={{
+              background: 'rgba(0, 112, 243, 0.05)',
+              border: '1px solid rgba(0, 112, 243, 0.12)',
+            }}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 status-pulse-green" />
+                <span className="text-[11px] font-semibold text-slate-300">Smart Automation Engine</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-600">v1.0</span>
             </div>
-            <p className="mt-1 text-[10px] text-slate-500">
-              Operational Data Active
-            </p>
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3 h-3 text-blue-500 flex-shrink-0" />
+              <p className="text-[10px] text-slate-600">Operational Data Active</p>
+            </div>
           </div>
         </div>
       </aside>
