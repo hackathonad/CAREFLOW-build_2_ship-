@@ -23,15 +23,10 @@ export const BedStatusModal: React.FC<BedStatusModalProps> = ({
   const [patientName, setPatientName] = useState(bed.patient_name || '');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      setIsUpdating(true);
-      await onUpdateStatus(bed.id, selectedStatus, patientName.trim() || undefined);
-      onClose();
-    } finally {
-      setIsUpdating(false);
-    }
+    onUpdateStatus(bed.id, selectedStatus, patientName.trim() || undefined);
+    onClose();
   };
 
   return (

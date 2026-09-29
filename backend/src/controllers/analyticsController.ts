@@ -9,8 +9,20 @@ import { ApprovalService } from '../services/approvals/approvalService.js';
 import { AppointmentService } from '../services/appointments/appointmentService.js';
 
 export class AnalyticsController {
+  private static cachedDashboard: any = null;
+  private static cachedDashboardTime = 0;
+
+  public static invalidateDashboardCache() {
+    AnalyticsController.cachedDashboard = null;
+    AnalyticsController.cachedDashboardTime = 0;
+  }
+
   public static async getDashboardStats(_req: Request, res: Response, next: NextFunction) {
     try {
+      if (AnalyticsController.cachedDashboard && Date.now() - AnalyticsController.cachedDashboardTime < 120000) {
+        return res.json(AnalyticsController.cachedDashboard);
+      }
+
       const [patients, beds, doctors, tasks, ambulances, inventory, approvals, appointments] =
         await Promise.all([
           PatientService.getAll(),
@@ -78,7 +90,7 @@ export class AnalyticsController {
           })),
       ];
 
-      res.json({
+      const responseData = {
         stats: {
           totalPatients: activePatients,
           occupiedBeds,
@@ -93,7 +105,12 @@ export class AnalyticsController {
         },
         bedDistribution,
         alerts: alerts.slice(0, 5),
-      });
+      };
+
+      AnalyticsController.cachedDashboard = responseData;
+      AnalyticsController.cachedDashboardTime = Date.now();
+
+      res.json(responseData);
     } catch (error) {
       next(error);
     }

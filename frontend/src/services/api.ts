@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { getInitialDataForUrl } from '../data/initialData';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -50,11 +51,9 @@ class ClientDataCache {
       const stored = sessionStorage.getItem(`cf_cache_${key}`) || localStorage.getItem(`cf_cache_${key}`);
       if (!stored) return null;
       const entry: CacheEntry<T> = JSON.parse(stored);
-      // Allow data up to 10 minutes old as stale cache for immediate render
-      if (Date.now() - entry.timestamp < 10 * 60 * 1000) {
-        this.cache.set(key, entry);
-        return entry.data;
-      }
+      // Return cached entry immediately for instantaneous UI render
+      this.cache.set(key, entry);
+      return entry.data;
     } catch {
       // Ignore storage errors
     }
@@ -78,11 +77,14 @@ class ClientDataCache {
     if (!entry) {
       const fromStorage = this.readStorage<T>(key);
       if (fromStorage !== null) return fromStorage;
-      return null;
-    }
-    // Return stale data up to 10 minutes to allow instant UI render
-    if (Date.now() - entry.timestamp > 10 * 60 * 1000) {
-      this.cache.delete(key);
+
+      // Fall back to bundled initial dataset for instant 0ms first paint
+      if (!params || Object.keys(params).length === 0) {
+        const bundled = getInitialDataForUrl<T>(url);
+        if (bundled !== null) {
+          return bundled;
+        }
+      }
       return null;
     }
     return entry.data as T;
@@ -170,10 +172,26 @@ const originalGet = api.get.bind(api);
   const params = config?.params;
   const cacheKey = clientCache.getKey(url, params);
 
-  // 1. If not skipping cache and we have fresh cached data, return immediately
+  // 1. If not skipping cache and we have cached or initial data, return immediately
   if (!skipCache) {
     const cachedData = clientCache.get<T>(url, params);
     if (cachedData !== null) {
+      // Quiet background SWR revalidation without blocking UI
+      if (!clientCache.getInFlight(cacheKey)) {
+        const bgPromise = (originalGet as any)(url, config)
+          .then((response: any) => {
+            if (response && response.data !== undefined) {
+              clientCache.set(url, params, response.data, ttlMs);
+            }
+            return response;
+          })
+          .catch(() => {})
+          .finally(() => {
+            clientCache.deleteInFlight(cacheKey);
+          });
+        clientCache.setInFlight(cacheKey, bgPromise);
+      }
+
       return Promise.resolve({
         data: cachedData,
         status: 200,

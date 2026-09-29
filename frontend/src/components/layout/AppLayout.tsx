@@ -15,26 +15,13 @@ import { analyticsService } from '../../services/analyticsService';
 export const AppLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Background proactive cache warming: preloads key views in staggered microtasks
+  // Smooth background sync after initial page has rendered
   useEffect(() => {
-    const warmupQueue = [
-      () => analyticsService.getDashboard(),
-      () => patientService.getAll({ status: 'all' }),
-      () => doctorService.getAll(),
-      () => bedService.getBeds(),
-      () => bedService.getWards(),
-      () => inventoryService.getAll(),
-      () => ambulanceService.getAll(),
-      () => appointmentService.getAll(),
-      () => taskService.getAll(),
-      () => approvalService.getAll(),
-    ];
-
-    warmupQueue.forEach((fetcher, i) => {
-      setTimeout(() => {
-        fetcher().catch(() => {});
-      }, 50 + i * 150);
-    });
+    // Gentle pre-sync after 4 seconds of idle time so user's active page has full bandwidth
+    const timer = setTimeout(() => {
+      analyticsService.getDashboard().catch(() => {});
+    }, 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

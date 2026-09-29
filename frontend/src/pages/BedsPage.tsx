@@ -72,8 +72,27 @@ export const BedsPage: React.FC = () => {
     status: BedStatus,
     patientName?: string
   ) => {
-    await bedService.updateBedStatus(bedId, status, patientName);
-    await fetchBedData();
+    // Optimistic Update: immediately update UI state and client cache (0ms perceived latency)
+    setBeds((prev) => {
+      const updated = prev.map((b) =>
+        b.id === bedId
+          ? {
+              ...b,
+              status,
+              patient_name: status === 'occupied' ? patientName : undefined,
+            }
+          : b
+      );
+      clientCache.set('/beds', undefined, updated);
+      return updated;
+    });
+
+    // Background sync to backend & database
+    try {
+      await bedService.updateBedStatus(bedId, status, patientName);
+    } catch (err) {
+      console.error('Failed to sync bed status:', err);
+    }
   };
 
   return (

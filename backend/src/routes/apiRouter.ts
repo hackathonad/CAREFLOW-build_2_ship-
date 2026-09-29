@@ -25,6 +25,7 @@ apiRouter.use((req, res, next) => {
     res.json = (body: any) => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         invalidateRouteCache();
+        AnalyticsController.invalidateDashboardCache();
       }
       return originalJson(body);
     };
@@ -42,8 +43,8 @@ apiRouter.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// Apply 30-second in-memory response cache to operational GET endpoints
-apiRouter.use(routeCache(30000));
+// Apply 5-minute high-performance in-memory response cache to operational GET endpoints
+apiRouter.use(routeCache(300000));
 
 // AI Command Center Endpoint (Strictly Backend Gemini / Automation Engine)
 apiRouter.post('/ai/command', validateBody(AICommandRequestSchema), AIController.executeCommand);
