@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, WifiOff } from 'lucide-react';
+import { API_BASE_URL } from '../../services/api';
 
 interface ErrorStateProps {
   title?: string;
@@ -33,6 +34,10 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
     );
   }
 
+  // Derive human-readable host name for diagnostic display
+  const displayHost = API_BASE_URL.replace(/^https?:\/\//, '').replace(/\/api\/?$/, '');
+  const isLocal = displayHost.includes('localhost') || displayHost.includes('127.0.0.1');
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-[fadeIn_0.3s_ease-out]">
       {/* Icon */}
@@ -54,7 +59,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <div className="space-y-1.5 text-xs text-slate-500">
           <div className="flex justify-between">
             <span>Backend API</span>
-            <span className="text-rose-400 font-mono">localhost:5000</span>
+            <span className="text-rose-400 font-mono truncate max-w-[170px]" title={displayHost}>{displayHost}</span>
           </div>
           <div className="flex justify-between">
             <span>Status</span>
@@ -62,7 +67,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
           </div>
           <div className="flex justify-between">
             <span>Action</span>
-            <span className="text-amber-400">Run npm start in /backend</span>
+            <span className="text-amber-400">
+              {isLocal ? 'Run npm start in /backend' : 'Verify Render service status / VITE_API_URL'}
+            </span>
           </div>
         </div>
       </div>

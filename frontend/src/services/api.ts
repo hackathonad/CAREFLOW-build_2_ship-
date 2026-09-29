@@ -1,13 +1,24 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Resolve API base URL:
+// 1. Read import.meta.env.VITE_API_URL (e.g. from Vercel environment variables)
+// 2. Fall back to local development server 'http://localhost:5000'
+const rawUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').trim();
+
+// Strip any trailing slashes
+const normalizedBase = rawUrl.replace(/\/+$/, '');
+
+// Ensure /api is appended if not already present, as all Express routes are mounted under /api
+export const API_BASE_URL = normalizedBase.endsWith('/api')
+  ? normalizedBase
+  : `${normalizedBase}/api`;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 20000,
 });
 
 api.interceptors.response.use(
@@ -16,7 +27,7 @@ api.interceptors.response.use(
     let message = 'An unexpected error occurred';
     if (!error.response) {
       // Backend not running or unreachable
-      message = 'Backend service unavailable. Check that the CareFlow API server is running on http://localhost:5000.';
+      message = `Backend service unavailable. Check that the CareFlow API server is reachable at ${API_BASE_URL}.`;
     } else if (error.response.status === 503) {
       message = error.response.data?.message || 'Service temporarily unavailable. AI or backend resource busy.';
     } else if (error.response.status === 502) {
