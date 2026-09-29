@@ -16,24 +16,28 @@ import {
   Calendar,
 } from 'lucide-react';
 
+import { clientCache } from '../services/api';
+
 export const PatientDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [patient, setPatient] = useState<Patient | null>(() => (id ? clientCache.get<Patient>(`/patients/${id}`) : null));
+  const [isLoading, setIsLoading] = useState(() => (id ? !clientCache.has(`/patients/${id}`) : false));
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
-      setIsLoading(true);
+      if (!patient) setIsLoading(true);
       patientService
         .getById(id)
         .then((data) => setPatient(data))
-        .catch((err) => setError(err.message))
+        .catch((err) => {
+          if (!patient) setError(err.message);
+        })
         .finally(() => setIsLoading(false));
     }
   }, [id]);
 
-  if (isLoading) return <LoadingState message="Loading patient file..." />;
+  if (isLoading && !patient) return <LoadingState message="Loading patient file..." />;
   if (error || !patient) return <ErrorState message={error || 'Patient not found'} />;
 
   return (

@@ -7,19 +7,23 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { CalendarDays, PlusCircle, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const AppointmentsPage: React.FC = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>(() => clientCache.get<Appointment[]>('/appointments') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/appointments'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('appointments');
+      }
+      if (appointments.length === 0) setIsLoading(true);
       setError(null);
       const data = await appointmentService.getAll({
         status: statusFilter !== 'all' ? (statusFilter as AppointmentStatus) : undefined,
@@ -27,7 +31,9 @@ export const AppointmentsPage: React.FC = () => {
       setAppointments(data);
     } catch (err: any) {
       console.error('Error fetching appointments:', err);
-      setError(err?.message || 'Failed to fetch appointments list');
+      if (appointments.length === 0) {
+        setError(err?.message || 'Failed to fetch appointments list');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +91,7 @@ export const AppointmentsPage: React.FC = () => {
             <span>Book Consultation</span>
           </button>
           <button
-            onClick={fetchAppointments}
+            onClick={() => fetchAppointments(true)}
             disabled={isLoading}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
             title="Refresh Appointments"

@@ -4,21 +4,27 @@ import { AnalyticsOverview } from '../components/analytics/AnalyticsOverview';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { BarChart3, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const AnalyticsPage: React.FC = () => {
-  const [metrics, setMetrics] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [metrics, setMetrics] = useState<any>(() => clientCache.get('/analytics/metrics'));
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/analytics/metrics'));
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('analytics');
+      }
+      if (!metrics) setIsLoading(true);
       setError(null);
       const data = await analyticsService.getMetrics();
       setMetrics(data);
     } catch (err: any) {
       console.error('Error fetching analytics:', err);
-      setError(err?.message || 'Failed to fetch operational analytics');
+      if (!metrics) {
+        setError(err?.message || 'Failed to fetch operational analytics');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +51,7 @@ export const AnalyticsPage: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchMetrics}
+          onClick={() => fetchMetrics(true)}
           disabled={isLoading}
           className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors self-start sm:self-auto"
           title="Refresh Analytics"

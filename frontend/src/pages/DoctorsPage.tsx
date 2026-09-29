@@ -7,19 +7,23 @@ import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { PageHeader } from '../components/shared/PageHeader';
 import { Stethoscope } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const DoctorsPage: React.FC = () => {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [doctors, setDoctors] = useState<Doctor[]>(() => clientCache.get<Doctor[]>('/doctors') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/doctors'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
 
-  const fetchDoctors = async () => {
+  const fetchDoctors = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('doctors');
+      }
+      if (doctors.length === 0) setIsLoading(true);
       setError(null);
       const data = await doctorService.getAll({
         availability: availabilityFilter !== 'all' ? availabilityFilter : undefined,
@@ -28,7 +32,9 @@ export const DoctorsPage: React.FC = () => {
       setDoctors(data);
     } catch (err: any) {
       console.error('Error fetching doctors:', err);
-      setError(err?.message || 'Failed to fetch doctor roster');
+      if (doctors.length === 0) {
+        setError(err?.message || 'Failed to fetch doctor roster');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +70,7 @@ export const DoctorsPage: React.FC = () => {
         subtitle="Real-time physician workload balancing, shift schedules, and departmental availability."
         iconColor="text-cyan-400"
         iconBg="bg-cyan-500/10 border-cyan-500/20"
-        onRefresh={fetchDoctors}
+        onRefresh={() => fetchDoctors(true)}
         isRefreshing={isLoading}
         actions={
           <select

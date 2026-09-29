@@ -9,10 +9,11 @@ import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { PageHeader } from '../components/shared/PageHeader';
 import { Users, UserPlus } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const PatientsPage: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [patients, setPatients] = useState<Patient[]>(() => clientCache.get<Patient[]>('/patients', { status: 'all' }) || clientCache.get<Patient[]>('/patients') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/patients', { status: 'all' }) && !clientCache.has('/patients'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,9 +21,12 @@ export const PatientsPage: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isAdmitModalOpen, setIsAdmitModalOpen] = useState(false);
 
-  const fetchPatients = async () => {
+  const fetchPatients = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('patients');
+      }
+      if (patients.length === 0) setIsLoading(true);
       setError(null);
       const data = await patientService.getAll({
         status: selectedFilter as PatientStatus | 'all',
@@ -31,7 +35,9 @@ export const PatientsPage: React.FC = () => {
       setPatients(data);
     } catch (err: any) {
       console.error('Error fetching patients:', err);
-      setError(err?.message || 'Failed to fetch patients list');
+      if (patients.length === 0) {
+        setError(err?.message || 'Failed to fetch patients list');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +96,7 @@ export const PatientsPage: React.FC = () => {
         subtitle="Admitted patient status tracking, stay duration metrics, and ward bed allocations."
         iconColor="text-blue-400"
         iconBg="bg-blue-500/10 border-blue-500/20"
-        onRefresh={fetchPatients}
+        onRefresh={() => fetchPatients(true)}
         isRefreshing={isLoading}
         actions={
           <button

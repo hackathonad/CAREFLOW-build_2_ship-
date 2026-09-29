@@ -6,19 +6,23 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { Building2, Globe2, ShieldCheck, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const HospitalNetworkPage: React.FC = () => {
-  const [facilities, setFacilities] = useState<NetworkFacility[]>([]);
-  const [ambStats, setAmbStats] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [facilities, setFacilities] = useState<NetworkFacility[]>(() => clientCache.get<NetworkFacility[]>('/network/facilities') || []);
+  const [ambStats, setAmbStats] = useState<any>(() => clientCache.get('/network/ambulance-reference'));
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/network/facilities'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [facilityTypeFilter, setFacilityTypeFilter] = useState('all');
 
-  const fetchNetworkData = async () => {
+  const fetchNetworkData = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('network');
+      }
+      if (facilities.length === 0) setIsLoading(true);
       setError(null);
       const [facs, amb] = await Promise.all([
         networkService.getFacilities({
@@ -30,7 +34,9 @@ export const HospitalNetworkPage: React.FC = () => {
       setAmbStats(amb);
     } catch (err: any) {
       console.error('Error fetching facilities:', err);
-      setError(err?.message || 'Failed to load health facilities directory');
+      if (facilities.length === 0) {
+        setError(err?.message || 'Failed to load health facilities directory');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +80,7 @@ export const HospitalNetworkPage: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchNetworkData}
+          onClick={() => fetchNetworkData(true)}
           disabled={isLoading}
           className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors self-start sm:self-auto"
           title="Refresh Directory"

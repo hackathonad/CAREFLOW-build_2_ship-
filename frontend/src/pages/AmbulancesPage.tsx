@@ -8,19 +8,23 @@ import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { PageHeader } from '../components/shared/PageHeader';
 import { Truck } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const AmbulancesPage: React.FC = () => {
-  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [ambulances, setAmbulances] = useState<Ambulance[]>(() => clientCache.get<Ambulance[]>('/ambulances') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/ambulances'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeDispatchAmbulance, setActiveDispatchAmbulance] = useState<Ambulance | null>(null);
 
-  const fetchAmbulances = async () => {
+  const fetchAmbulances = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('ambulances');
+      }
+      if (ambulances.length === 0) setIsLoading(true);
       setError(null);
       const data = await ambulanceService.getAll(
         statusFilter !== 'all' ? (statusFilter as AmbulanceStatus) : undefined
@@ -28,7 +32,9 @@ export const AmbulancesPage: React.FC = () => {
       setAmbulances(data);
     } catch (err: any) {
       console.error('Error fetching ambulances:', err);
-      setError(err?.message || 'Failed to fetch ambulance fleet data');
+      if (ambulances.length === 0) {
+        setError(err?.message || 'Failed to fetch ambulance fleet data');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +81,7 @@ export const AmbulancesPage: React.FC = () => {
         subtitle="Emergency telemetry, active transit routes, and trauma triage coordination."
         iconColor="text-amber-400"
         iconBg="bg-amber-500/10 border-amber-500/20"
-        onRefresh={fetchAmbulances}
+        onRefresh={() => fetchAmbulances(true)}
         isRefreshing={isLoading}
       />
 

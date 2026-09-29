@@ -7,11 +7,12 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { BedDouble, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const BedsPage: React.FC = () => {
-  const [beds, setBeds] = useState<Bed[]>([]);
-  const [wards, setWards] = useState<Ward[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [beds, setBeds] = useState<Bed[]>(() => clientCache.get<Bed[]>('/beds') || []);
+  const [wards, setWards] = useState<Ward[]>(() => clientCache.get<Ward[]>('/beds/wards') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/beds'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,9 +20,12 @@ export const BedsPage: React.FC = () => {
   const [selectedWard, setSelectedWard] = useState('all');
   const [activeBedModal, setActiveBedModal] = useState<Bed | null>(null);
 
-  const fetchBedData = async () => {
+  const fetchBedData = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('beds');
+      }
+      if (beds.length === 0) setIsLoading(true);
       setError(null);
       const [bedsData, wardsData] = await Promise.all([
         bedService.getBeds({
@@ -34,7 +38,9 @@ export const BedsPage: React.FC = () => {
       setWards(wardsData);
     } catch (err: any) {
       console.error('Error fetching beds:', err);
-      setError(err?.message || 'Failed to fetch ward & bed data');
+      if (beds.length === 0) {
+        setError(err?.message || 'Failed to fetch ward & bed data');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +109,7 @@ export const BedsPage: React.FC = () => {
           </select>
 
           <button
-            onClick={fetchBedData}
+            onClick={() => fetchBedData(true)}
             disabled={isLoading}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
             title="Refresh Bed Status"

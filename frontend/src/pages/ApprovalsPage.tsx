@@ -6,18 +6,22 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { ShieldCheck, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const ApprovalsPage: React.FC = () => {
-  const [approvals, setApprovals] = useState<Approval[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [approvals, setApprovals] = useState<Approval[]>(() => clientCache.get<Approval[]>('/approvals', { status: 'pending' }) || clientCache.get<Approval[]>('/approvals') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/approvals', { status: 'pending' }) && !clientCache.has('/approvals'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | 'all'>('pending');
 
-  const fetchApprovals = async () => {
+  const fetchApprovals = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('approvals');
+      }
+      if (approvals.length === 0) setIsLoading(true);
       setError(null);
       const data = await approvalService.getAll(
         statusFilter !== 'all' ? (statusFilter as ApprovalStatus) : undefined
@@ -25,7 +29,9 @@ export const ApprovalsPage: React.FC = () => {
       setApprovals(data);
     } catch (err: any) {
       console.error('Error fetching approvals:', err);
-      setError(err?.message || 'Failed to fetch approvals queue');
+      if (approvals.length === 0) {
+        setError(err?.message || 'Failed to fetch approvals queue');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +80,7 @@ export const ApprovalsPage: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchApprovals}
+          onClick={() => fetchApprovals(true)}
           disabled={isLoading}
           className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors self-start sm:self-auto"
           title="Refresh Approvals"

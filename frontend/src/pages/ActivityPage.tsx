@@ -5,24 +5,30 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { History, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const ActivityPage: React.FC = () => {
-  const [items, setItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<any[]>(() => clientCache.get('/activity/timeline') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/activity/timeline'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [entityFilter, setEntityFilter] = useState('all');
 
-  const fetchActivity = async () => {
+  const fetchActivity = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('activity');
+      }
+      if (items.length === 0) setIsLoading(true);
       setError(null);
       const data = await activityService.getTimeline();
       setItems(data);
     } catch (err: any) {
       console.error('Error fetching activity log:', err);
-      setError(err?.message || 'Failed to fetch operational activity log');
+      if (items.length === 0) {
+        setError(err?.message || 'Failed to fetch operational activity log');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +79,7 @@ export const ActivityPage: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchActivity}
+          onClick={() => fetchActivity(true)}
           disabled={isLoading}
           className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors self-start sm:self-auto"
           title="Refresh Log"

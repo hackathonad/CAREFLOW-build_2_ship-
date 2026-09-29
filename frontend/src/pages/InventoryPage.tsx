@@ -7,10 +7,11 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { PackageSearch, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const InventoryPage: React.FC = () => {
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<InventoryItem[]>(() => clientCache.get<InventoryItem[]>('/inventory') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/inventory'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,9 +19,12 @@ export const InventoryPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [activeRestockItem, setActiveRestockItem] = useState<InventoryItem | null>(null);
 
-  const fetchInventory = async () => {
+  const fetchInventory = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('inventory');
+      }
+      if (items.length === 0) setIsLoading(true);
       setError(null);
       const data = await inventoryService.getAll({
         status: statusFilter !== 'all' ? (statusFilter as InventoryStatus) : undefined,
@@ -29,7 +33,9 @@ export const InventoryPage: React.FC = () => {
       setItems(data);
     } catch (err: any) {
       console.error('Error fetching inventory:', err);
-      setError(err?.message || 'Failed to fetch inventory catalog');
+      if (items.length === 0) {
+        setError(err?.message || 'Failed to fetch inventory catalog');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +100,7 @@ export const InventoryPage: React.FC = () => {
           </select>
 
           <button
-            onClick={fetchInventory}
+            onClick={() => fetchInventory(true)}
             disabled={isLoading}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
             title="Refresh Inventory"

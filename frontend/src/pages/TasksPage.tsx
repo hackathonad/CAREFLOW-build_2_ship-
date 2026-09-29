@@ -7,10 +7,11 @@ import { FilterBar } from '../components/shared/FilterBar';
 import { LoadingState } from '../components/shared/LoadingState';
 import { ErrorState } from '../components/shared/ErrorState';
 import { CheckSquare, PlusCircle, RefreshCw } from 'lucide-react';
+import { clientCache } from '../services/api';
 
 export const TasksPage: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>(() => clientCache.get<Task[]>('/tasks') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/tasks'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,9 +19,12 @@ export const TasksPage: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (isManualRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (isManualRefresh) {
+        clientCache.invalidate('tasks');
+      }
+      if (tasks.length === 0) setIsLoading(true);
       setError(null);
       const data = await taskService.getAll({
         status: statusFilter !== 'all' ? (statusFilter as TaskStatus) : undefined,
@@ -29,7 +33,9 @@ export const TasksPage: React.FC = () => {
       setTasks(data);
     } catch (err: any) {
       console.error('Error fetching tasks:', err);
-      setError(err?.message || 'Failed to fetch operational tasks');
+      if (tasks.length === 0) {
+        setError(err?.message || 'Failed to fetch operational tasks');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +112,7 @@ export const TasksPage: React.FC = () => {
           </button>
 
           <button
-            onClick={fetchTasks}
+            onClick={() => fetchTasks(true)}
             disabled={isLoading}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs transition-colors"
             title="Refresh Tasks"
