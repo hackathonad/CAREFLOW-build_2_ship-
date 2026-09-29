@@ -18,7 +18,7 @@ const allowedDevOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Allow requests with no origin (such as mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
 
@@ -53,7 +53,7 @@ app.use(requestLogger);
 app.use('/api', apiRouter);
 
 // Root info route
-app.get('/', (_req, res) => {
+app.get('/', (_req: express.Request, res: express.Response) => {
   res.json({
     name: 'CareFlow AI Backend API',
     version: '1.0.0',
