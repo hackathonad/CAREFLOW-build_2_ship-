@@ -9,8 +9,8 @@ import { ShieldCheck, RefreshCw } from 'lucide-react';
 import { clientCache } from '../services/api';
 
 export const ApprovalsPage: React.FC = () => {
-  const [approvals, setApprovals] = useState<Approval[]>(() => clientCache.get<Approval[]>('/approvals', { status: 'pending' }) || clientCache.get<Approval[]>('/approvals') || []);
-  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/approvals', { status: 'pending' }) && !clientCache.has('/approvals'));
+  const [approvals, setApprovals] = useState<Approval[]>(() => clientCache.get<Approval[]>('/approvals') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/approvals'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,9 +23,7 @@ export const ApprovalsPage: React.FC = () => {
       }
       if (approvals.length === 0) setIsLoading(true);
       setError(null);
-      const data = await approvalService.getAll(
-        statusFilter !== 'all' ? (statusFilter as ApprovalStatus) : undefined
-      );
+      const data = await approvalService.getAll();
       setApprovals(data);
     } catch (err: any) {
       console.error('Error fetching approvals:', err);
@@ -39,9 +37,10 @@ export const ApprovalsPage: React.FC = () => {
 
   useEffect(() => {
     fetchApprovals();
-  }, [statusFilter]);
+  }, []);
 
   const filteredApprovals = approvals.filter((a) => {
+    if (statusFilter !== 'all' && a.status !== statusFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

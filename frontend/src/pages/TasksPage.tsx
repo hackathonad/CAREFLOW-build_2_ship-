@@ -26,10 +26,7 @@ export const TasksPage: React.FC = () => {
       }
       if (tasks.length === 0) setIsLoading(true);
       setError(null);
-      const data = await taskService.getAll({
-        status: statusFilter !== 'all' ? (statusFilter as TaskStatus) : undefined,
-        priority: priorityFilter !== 'all' ? (priorityFilter as TaskPriority) : undefined,
-      });
+      const data = await taskService.getAll();
       setTasks(data);
     } catch (err: any) {
       console.error('Error fetching tasks:', err);
@@ -43,9 +40,11 @@ export const TasksPage: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [statusFilter, priorityFilter]);
+  }, []);
 
   const filteredTasks = tasks.filter((t) => {
+    if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+    if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

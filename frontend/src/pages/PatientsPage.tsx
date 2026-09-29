@@ -12,8 +12,8 @@ import { Users, UserPlus } from 'lucide-react';
 import { clientCache } from '../services/api';
 
 export const PatientsPage: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>(() => clientCache.get<Patient[]>('/patients', { status: 'all' }) || clientCache.get<Patient[]>('/patients') || []);
-  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/patients', { status: 'all' }) && !clientCache.has('/patients'));
+  const [patients, setPatients] = useState<Patient[]>(() => clientCache.get<Patient[]>('/patients') || []);
+  const [isLoading, setIsLoading] = useState(() => !clientCache.has('/patients'));
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,10 +28,7 @@ export const PatientsPage: React.FC = () => {
       }
       if (patients.length === 0) setIsLoading(true);
       setError(null);
-      const data = await patientService.getAll({
-        status: selectedFilter as PatientStatus | 'all',
-        search: searchQuery || undefined,
-      });
+      const data = await patientService.getAll();
       setPatients(data);
     } catch (err: any) {
       console.error('Error fetching patients:', err);
@@ -45,13 +42,14 @@ export const PatientsPage: React.FC = () => {
 
   useEffect(() => {
     fetchPatients();
-  }, [selectedFilter]);
+  }, []);
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
   };
 
   const filteredPatients = patients.filter((p) => {
+    if (selectedFilter !== 'all' && p.status !== selectedFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

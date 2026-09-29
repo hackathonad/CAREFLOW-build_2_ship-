@@ -28,10 +28,7 @@ export const BedsPage: React.FC = () => {
       if (beds.length === 0) setIsLoading(true);
       setError(null);
       const [bedsData, wardsData] = await Promise.all([
-        bedService.getBeds({
-          status: statusFilter !== 'all' ? (statusFilter as BedStatus) : undefined,
-          wardId: selectedWard !== 'all' ? selectedWard : undefined,
-        }),
+        bedService.getBeds(),
         bedService.getWards(),
       ]);
       setBeds(bedsData);
@@ -48,9 +45,11 @@ export const BedsPage: React.FC = () => {
 
   useEffect(() => {
     fetchBedData();
-  }, [statusFilter, selectedWard]);
+  }, []);
 
   const filteredBeds = beds.filter((b) => {
+    if (statusFilter !== 'all' && b.status !== statusFilter) return false;
+    if (selectedWard !== 'all' && b.ward_id !== selectedWard) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

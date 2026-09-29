@@ -26,10 +26,7 @@ export const InventoryPage: React.FC = () => {
       }
       if (items.length === 0) setIsLoading(true);
       setError(null);
-      const data = await inventoryService.getAll({
-        status: statusFilter !== 'all' ? (statusFilter as InventoryStatus) : undefined,
-        category: categoryFilter !== 'all' ? categoryFilter : undefined,
-      });
+      const data = await inventoryService.getAll();
       setItems(data);
     } catch (err: any) {
       console.error('Error fetching inventory:', err);
@@ -43,9 +40,11 @@ export const InventoryPage: React.FC = () => {
 
   useEffect(() => {
     fetchInventory();
-  }, [statusFilter, categoryFilter]);
+  }, []);
 
   const filteredItems = items.filter((item) => {
+    if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+    if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

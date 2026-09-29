@@ -26,9 +26,7 @@ export const AmbulancesPage: React.FC = () => {
       }
       if (ambulances.length === 0) setIsLoading(true);
       setError(null);
-      const data = await ambulanceService.getAll(
-        statusFilter !== 'all' ? (statusFilter as AmbulanceStatus) : undefined
-      );
+      const data = await ambulanceService.getAll();
       setAmbulances(data);
     } catch (err: any) {
       console.error('Error fetching ambulances:', err);
@@ -42,9 +40,10 @@ export const AmbulancesPage: React.FC = () => {
 
   useEffect(() => {
     fetchAmbulances();
-  }, [statusFilter]);
+  }, []);
 
   const filteredAmbulances = ambulances.filter((a) => {
+    if (statusFilter !== 'all' && a.vehicle_status !== statusFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

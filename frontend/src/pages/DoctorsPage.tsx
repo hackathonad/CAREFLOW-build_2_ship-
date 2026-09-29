@@ -25,10 +25,7 @@ export const DoctorsPage: React.FC = () => {
       }
       if (doctors.length === 0) setIsLoading(true);
       setError(null);
-      const data = await doctorService.getAll({
-        availability: availabilityFilter !== 'all' ? availabilityFilter : undefined,
-        department: departmentFilter !== 'all' ? departmentFilter : undefined,
-      });
+      const data = await doctorService.getAll();
       setDoctors(data);
     } catch (err: any) {
       console.error('Error fetching doctors:', err);
@@ -42,9 +39,11 @@ export const DoctorsPage: React.FC = () => {
 
   useEffect(() => {
     fetchDoctors();
-  }, [availabilityFilter, departmentFilter]);
+  }, []);
 
   const filteredDoctors = doctors.filter((doc) => {
+    if (availabilityFilter !== 'all' && doc.availability !== availabilityFilter) return false;
+    if (departmentFilter !== 'all' && doc.department !== departmentFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

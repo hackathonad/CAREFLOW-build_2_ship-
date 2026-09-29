@@ -25,9 +25,7 @@ export const HospitalNetworkPage: React.FC = () => {
       if (facilities.length === 0) setIsLoading(true);
       setError(null);
       const [facs, amb] = await Promise.all([
-        networkService.getFacilities({
-          facilityType: facilityTypeFilter !== 'all' ? facilityTypeFilter : undefined,
-        }),
+        networkService.getFacilities(),
         networkService.getAmbulanceReference().catch(() => null),
       ]);
       setFacilities(facs);
@@ -44,9 +42,15 @@ export const HospitalNetworkPage: React.FC = () => {
 
   useEffect(() => {
     fetchNetworkData();
-  }, [facilityTypeFilter]);
+  }, []);
 
   const filteredFacilities = facilities.filter((f) => {
+    if (
+      facilityTypeFilter !== 'all' &&
+      !f.facility_type?.toLowerCase().includes(facilityTypeFilter.toLowerCase())
+    ) {
+      return false;
+    }
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (

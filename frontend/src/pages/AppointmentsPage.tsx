@@ -25,9 +25,7 @@ export const AppointmentsPage: React.FC = () => {
       }
       if (appointments.length === 0) setIsLoading(true);
       setError(null);
-      const data = await appointmentService.getAll({
-        status: statusFilter !== 'all' ? (statusFilter as AppointmentStatus) : undefined,
-      });
+      const data = await appointmentService.getAll();
       setAppointments(data);
     } catch (err: any) {
       console.error('Error fetching appointments:', err);
@@ -41,9 +39,10 @@ export const AppointmentsPage: React.FC = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [statusFilter]);
+  }, []);
 
   const filteredAppointments = appointments.filter((app) => {
+    if (statusFilter !== 'all' && app.status !== statusFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
