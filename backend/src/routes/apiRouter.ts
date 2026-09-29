@@ -14,19 +14,36 @@ import { NetworkController } from '../controllers/networkController.js';
 import { AnalyticsController } from '../controllers/analyticsController.js';
 import { ActivityController } from '../controllers/activityController.js';
 import { config } from '../config/index.js';
+import { routeCache, invalidateRouteCache } from '../middleware/routeCache.js';
 
 export const apiRouter = Router();
 
-// Health Check Endpoint
+// Automatic server cache invalidation whenever a mutation occurs
+apiRouter.use((req, res, next) => {
+  if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method)) {
+    const originalJson = res.json.bind(res);
+    res.json = (body: any) => {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        invalidateRouteCache();
+      }
+      return originalJson(body);
+    };
+  }
+  next();
+});
+
+// Health Check Endpoint (Bypasses Cache)
 apiRouter.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     system: 'CareFlow AI Hospital Operations Platform',
     timestamp: new Date().toISOString(),
     databaseMode: config.hasSupabase ? 'Supabase PostgreSQL (Live)' : 'Synthetic Resilient Store',
-    aiEngine: config.hasGemini ? 'Google Gemini 2.5 Flash' : 'Deterministic Hybrid NLP',
   });
 });
+
+// Apply 30-second in-memory response cache to operational GET endpoints
+apiRouter.use(routeCache(30000));
 
 // AI Command Center Endpoint (Strictly Backend Gemini / Automation Engine)
 apiRouter.post('/ai/command', validateBody(AICommandRequestSchema), AIController.executeCommand);

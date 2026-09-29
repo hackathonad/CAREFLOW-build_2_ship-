@@ -29,7 +29,7 @@ interface CacheEntry<T = any> {
 class ClientDataCache {
   private cache = new Map<string, CacheEntry>();
   private inFlight = new Map<string, Promise<any>>();
-  private defaultTTL = 60 * 1000; // 60 seconds cache
+  private defaultTTL = 120 * 1000; // 2 minutes active TTL
 
   private buildKey(url: string, params?: any): string {
     const cleanUrl = url.replace(/^\/+/, '');
@@ -44,11 +44,44 @@ class ClientDataCache {
     return query ? `${cleanUrl}?${query}` : cleanUrl;
   }
 
+  private readStorage<T>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = sessionStorage.getItem(`cf_cache_${key}`) || localStorage.getItem(`cf_cache_${key}`);
+      if (!stored) return null;
+      const entry: CacheEntry<T> = JSON.parse(stored);
+      // Allow data up to 10 minutes old as stale cache for immediate render
+      if (Date.now() - entry.timestamp < 10 * 60 * 1000) {
+        this.cache.set(key, entry);
+        return entry.data;
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    return null;
+  }
+
+  private writeStorage<T>(key: string, entry: CacheEntry<T>): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const serialized = JSON.stringify(entry);
+      sessionStorage.setItem(`cf_cache_${key}`, serialized);
+      localStorage.setItem(`cf_cache_${key}`, serialized);
+    } catch {
+      // Ignore quota errors
+    }
+  }
+
   get<T>(url: string, params?: any): T | null {
     const key = this.buildKey(url, params);
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-    if (Date.now() > entry.expiresAt) {
+    let entry = this.cache.get(key);
+    if (!entry) {
+      const fromStorage = this.readStorage<T>(key);
+      if (fromStorage !== null) return fromStorage;
+      return null;
+    }
+    // Return stale data up to 10 minutes to allow instant UI render
+    if (Date.now() - entry.timestamp > 10 * 60 * 1000) {
       this.cache.delete(key);
       return null;
     }
@@ -57,11 +90,13 @@ class ClientDataCache {
 
   set<T>(url: string, params: any, data: T, ttlMs: number = this.defaultTTL): void {
     const key = this.buildKey(url, params);
-    this.cache.set(key, {
+    const entry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
       expiresAt: Date.now() + ttlMs,
-    });
+    };
+    this.cache.set(key, entry);
+    this.writeStorage(key, entry);
   }
 
   has(url: string, params?: any): boolean {
@@ -71,11 +106,27 @@ class ClientDataCache {
   invalidate(pattern?: string | RegExp): void {
     if (!pattern) {
       this.cache.clear();
+      if (typeof window !== 'undefined') {
+        try {
+          Object.keys(sessionStorage).forEach((k) => {
+            if (k.startsWith('cf_cache_')) sessionStorage.removeItem(k);
+          });
+          Object.keys(localStorage).forEach((k) => {
+            if (k.startsWith('cf_cache_')) localStorage.removeItem(k);
+          });
+        } catch {}
+      }
       return;
     }
     for (const key of Array.from(this.cache.keys())) {
       if (typeof pattern === 'string' ? key.includes(pattern) : pattern.test(key)) {
         this.cache.delete(key);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.removeItem(`cf_cache_${key}`);
+            localStorage.removeItem(`cf_cache_${key}`);
+          } catch {}
+        }
       }
     }
   }

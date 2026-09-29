@@ -13,6 +13,46 @@ import { PageHeader } from '../components/shared/PageHeader';
 import { LayoutDashboard, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const DashboardSkeleton: React.FC = () => (
+  <div className="space-y-6 animate-pulse">
+    {/* Alert Banner Skeleton */}
+    <div className="h-16 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center px-4 space-x-3">
+      <div className="w-8 h-8 rounded-lg bg-slate-800" />
+      <div className="flex-1 space-y-2">
+        <div className="w-48 h-3.5 bg-slate-800 rounded" />
+        <div className="w-72 h-2.5 bg-slate-800/60 rounded" />
+      </div>
+    </div>
+
+    {/* 4 Stat Cards Skeleton */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="h-28 rounded-xl bg-slate-900/60 border border-slate-800/80 p-5 space-y-3">
+          <div className="flex justify-between items-center">
+            <div className="w-24 h-3 bg-slate-800 rounded" />
+            <div className="w-6 h-6 rounded-lg bg-slate-800" />
+          </div>
+          <div className="w-16 h-7 bg-slate-800 rounded" />
+          <div className="w-32 h-2.5 bg-slate-800/60 rounded" />
+        </div>
+      ))}
+    </div>
+
+    {/* Ward Overview Skeleton */}
+    <div className="h-64 rounded-xl bg-slate-900/60 border border-slate-800/80 p-6 space-y-4">
+      <div className="w-40 h-4 bg-slate-800 rounded" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-40 rounded-lg bg-slate-950/60 border border-slate-800/40 p-4 space-y-2">
+            <div className="w-20 h-3 bg-slate-800 rounded" />
+            <div className="w-12 h-6 bg-slate-800 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export const DashboardPage: React.FC = () => {
   const [data, setData] = useState<any>(() => clientCache.get('/analytics/dashboard'));
   const [tasks, setTasks] = useState<any[]>(() => clientCache.get('/tasks') || []);
@@ -72,7 +112,7 @@ export const DashboardPage: React.FC = () => {
       />
 
       {isLoading && !data ? (
-        <LoadingState message="Connecting to hospital operations backend..." />
+        <DashboardSkeleton />
       ) : error && !data ? (
         <ErrorState message={error} onRetry={() => fetchDashboardData(true)} />
       ) : data && (
