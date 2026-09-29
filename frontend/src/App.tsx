@@ -16,6 +16,7 @@ import { ApprovalsPage } from './pages/ApprovalsPage';
 import { HospitalNetworkPage } from './pages/HospitalNetworkPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ActivityPage } from './pages/ActivityPage';
+import { Analytics } from '@vercel/analytics/react';
 
 export function App() {
   return (
@@ -45,6 +46,7 @@ export function App() {
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }
